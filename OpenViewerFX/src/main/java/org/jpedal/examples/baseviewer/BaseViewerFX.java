@@ -546,7 +546,22 @@ public class BaseViewerFX extends Application {
         
         return toolbar;
     }
-    
+
+	/**
+	 * take PDF file bytes and display in PDF viewer
+	 */
+    public void loadPDF(final byte[] data){
+        
+        if(data == null) {
+            return;
+        }
+        
+        scale = 1; //reset to default for new page
+        
+        openPdfArray(data);
+        
+    }
+	
     /**
      * take a File handle to PDF file on local filesystem and displays in PDF viewer
      * @param input  The PDF file to load in the viewer 
@@ -647,6 +662,34 @@ public class BaseViewerFX extends Application {
                     
                 }
                 
+            }
+
+            // Set up top bar values
+            ((Labeled)top.lookup("#pgCount")).setText("/" + pdf.getPageCount());
+            final ComboBox<String> pages = ((ComboBox<String>)top.lookup("#pages"));
+            pages.getItems().clear();
+            for(int i = 1; i <= pdf.getPageCount(); i++){
+                pages.getItems().add(String.valueOf(i));
+            }
+            // Goes to the first page and starts the decoding process
+            goToPage(currentPage);
+
+        } catch (final PdfException ex) {
+            ex.printStackTrace();
+
+        }
+
+    }
+ 
+     private void openPdfArray(final byte[] data) {
+        try {
+        	pdf.openPdfArray(data);
+        	
+            if(System.getProperty("org.jpedal.page") != null && !System.getProperty("org.jpedal.page").isEmpty()){
+                currentPage = currentPage < 1 ? 1 : currentPage;
+                currentPage = currentPage > pdf.getPageCount() ? pdf.getPageCount() : currentPage;
+            }else{
+                currentPage = 1;
             }
 
             // Set up top bar values
